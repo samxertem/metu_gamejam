@@ -1,0 +1,64 @@
+using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
+
+public class PostProcessingConfigurator : MonoBehaviour
+{
+    private void Start()
+    {
+        // Global Volume oluştur
+        GameObject volumeObj = new GameObject("GlobalVolume");
+        Volume volume = volumeObj.AddComponent<Volume>();
+        volume.isGlobal = true;
+        
+        // Yeni bir VolumeProfile yarat
+        VolumeProfile profile = ScriptableObject.CreateInstance<VolumeProfile>();
+        
+        // Vignette
+        Vignette vignette;
+        if (profile.Add<Vignette>(out vignette))
+        {
+            vignette.intensity.Override(0.5f);
+            vignette.color.Override(Color.black);
+            vignette.active = true;
+        }
+
+        // Color Adjustments
+        ColorAdjustments colorAdj;
+        if (profile.Add<ColorAdjustments>(out colorAdj))
+        {
+            colorAdj.saturation.Override(-35f);
+            colorAdj.contrast.Override(25f);
+            colorAdj.active = true;
+        }
+
+        // Bloom
+        Bloom bloom;
+        if (profile.Add<Bloom>(out bloom))
+        {
+            bloom.intensity.Override(0.4f);
+            bloom.threshold.Override(0.9f);
+            bloom.active = true;
+        }
+
+        // Film Grain
+        FilmGrain grain;
+        if (profile.Add<FilmGrain>(out grain))
+        {
+            grain.type.Override(FilmGrainLookup.Thin2); // URP "Blue" stiline en yakın ince film gren tabakası
+            grain.intensity.Override(0.4f);
+            grain.active = true;
+        }
+
+        // Shadows, Midtones, Highlights
+        ShadowsMidtonesHighlights smh;
+        if (profile.Add<ShadowsMidtonesHighlights>(out smh))
+        {
+            // Mor tonlu shadow boost
+            smh.shadows.Override(new Vector4(0.8f, 0f, 1f, -0.1f)); 
+            smh.active = true;
+        }
+
+        volume.profile = profile;
+    }
+}
